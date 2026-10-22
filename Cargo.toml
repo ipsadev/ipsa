@@ -1,0 +1,51 @@
+[package]
+name = "ipsa"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.91.0"
+license = "Apache-2.0"
+description = "Building blocks for IBC v2 on Stellar: commitment proofs, the Soroban router interface, GMP and ICS-20"
+repository = "https://github.com/ipsadev/ipsa-dev-kit"
+documentation = "https://docs.rs/ipsa"
+readme = "README.md"
+exclude = ["examples/", ".github/"]
+keywords = ["ibc", "stellar", "soroban", "ics23", "interoperability"]
+categories = ["cryptography::cryptocurrencies", "no-std"]
+
+[features]
+default = ["core", "types", "app", "gmp", "ics20"]
+core = ["dep:ics23", "dep:prost", "dep:sha2"]
+types = ["dep:soroban-sdk"]
+app = ["types"]
+gmp = ["dep:soroban-sdk"]
+ics20 = ["dep:soroban-sdk"]
+
+[dependencies]
+ics23 = { version = "0.12", default-features = false, optional = true }
+prost = { version = "0.13", default-features = false, features = ["derive"], optional = true }
+sha2 = { version = "0.10", default-features = false, optional = true }
+soroban-sdk = { version = "26.1.0", optional = true }
+
+[dev-dependencies]
+soroban-sdk = { version = "26.1.0", features = ["testutils"] }
+
+[lints.rust]
+unsafe_code = "deny"
+
+[package.metadata.docs.rs]
+all-features = true
+
+[workspace]
+members = [".", "examples/*"]
+resolver = "2"
+
+[profile.contract]
+inherits = "release"
+opt-level = "z"
+overflow-checks = true
+debug = 0
+strip = "symbols"
+debug-assertions = false
+panic = "abort"
+codegen-units = 1
+lto = true
