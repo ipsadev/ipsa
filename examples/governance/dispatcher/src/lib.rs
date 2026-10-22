@@ -30,13 +30,13 @@ enum DataKey {
 }
 
 #[contract]
-pub struct IpsaGmpCaller;
+pub struct IpsaDispatcher;
 
 #[contractimpl(contracttrait)]
-impl Ownable for IpsaGmpCaller {}
+impl Ownable for IpsaDispatcher {}
 
 #[contractimpl]
-impl IpsaGmpCaller {
+impl IpsaDispatcher {
     pub fn __constructor(env: Env, owner: Address, gmp: Address) {
         set_owner(&env, &owner);
         env.storage().instance().set(&DataKey::Gmp, &gmp);

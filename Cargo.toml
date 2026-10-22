@@ -8,7 +8,7 @@ description = "Building blocks for IBC v2 on Stellar: commitment proofs, the Sor
 repository = "https://github.com/ipsadev/ipsa-dev-kit"
 documentation = "https://docs.rs/ipsa"
 readme = "README.md"
-exclude = ["examples/", ".github/"]
+exclude = ["examples/", "testing/", ".github/"]
 keywords = ["ibc", "stellar", "soroban", "ics23", "interoperability"]
 categories = ["cryptography::cryptocurrencies", "no-std"]
 
@@ -36,7 +36,13 @@ unsafe_code = "deny"
 all-features = true
 
 [workspace]
-members = [".", "examples/*"]
+members = [
+    ".",
+    "examples/governance/dispatcher",
+    "examples/payouts",
+    "examples/remote-treasury",
+    "testing/light-client",
+]
 resolver = "2"
 
 [profile.contract]

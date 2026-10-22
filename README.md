@@ -63,12 +63,18 @@ The contract cannot ask the GMP app during the call: Soroban does not let a cont
 
 ## Examples
 
-`examples/gmp-caller` is a contract that sends GMP calls as itself and records each outcome from the callbacks; the ipsa CLI deploys it to test the GMP corridors. Its tests run it against the real router, GMP app and mock light client, imported as wasm from an `ipsa-contracts` release, the way a project outside ipsa would test.
+Small apps a developer could build on ipsa, around one story: governance on one chain acting on another. Each is tested against the real router and apps, imported as wasm from an `ipsa-contracts` release, the way a project outside ipsa would test.
+
+- `examples/governance/dispatcher`: governance on Stellar acting on other chains. It sends approved actions to contracts on other chains through GMP and records each outcome, from pending to executed, rejected or timed out. Its owner is the governance contract, so only an approved proposal dispatches; the ipsa CLI deploys it with the admin as owner to test the GMP corridors. The council that votes on proposals and the executor on the other chain are still to come.
+- `examples/remote-treasury`: the same story the other way round, a treasury on Stellar governed by a DAO on another chain. Only the DAO's account, derived with `ipsa::gmp::remote_account`, can change it.
+- `examples/payouts`: how a treasury pays people on other chains through ICS-20, recording each payout as paid, refunded or timed out.
+
+The protocol contracts themselves (router, transfer and GMP apps, light clients) live in `ipsa-contracts`. What lives here is what a developer copies and deploys for their own application.
 
 ```sh
 just contracts                                  # the CONTRACTS_VERSION release into contracts/
 CONTRACTS_WASM_DIR=../ipsa-contracts/target/wasm32v1-none/contract just contracts
-just build-examples                             # the example's wasm, for deploying
+just build-examples                             # the examples' wasm, for deploying
 ```
 
 ## Development

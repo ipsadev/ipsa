@@ -1,4 +1,4 @@
-# `ipsa-gmp-caller` — a contract that sends GMP calls and records their outcome
+# `ipsa-dispatcher` — governance acting on other chains
 
 An example of the sending side of ICS-27 GMP on Soroban, and the contract the ipsa CLI uses to test it.
 

@@ -27,7 +27,9 @@ contracts:
 
 # the examples' contract wasm, for deploying
 build-examples:
-    stellar contract build --profile contract --package ipsa-gmp-caller
+    stellar contract build --profile contract --package ipsa-dispatcher
+    stellar contract build --profile contract --package ipsa-remote-treasury
+    stellar contract build --profile contract --package ipsa-payouts
 
 fmt:
     cargo +nightly fmt --all

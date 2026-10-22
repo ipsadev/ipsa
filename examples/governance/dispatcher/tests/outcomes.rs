@@ -1,19 +1,15 @@
-use ipsa_gmp_caller::{Error, GmpAcknowledged, IpsaGmpCaller, IpsaGmpCallerClient, Outcome};
+use ipsa_dispatcher::{Error, GmpAcknowledged, IpsaDispatcher, IpsaDispatcherClient, Outcome};
 use soroban_sdk::{
     testutils::{Address as _, Ledger},
     vec, Address, Bytes, Env, String,
 };
 
 mod router {
-    soroban_sdk::contractimport!(file = "../../contracts/stellar_ibc_router.wasm");
+    soroban_sdk::contractimport!(file = "../../../contracts/stellar_ibc_router.wasm");
 }
 
 mod gmp {
-    soroban_sdk::contractimport!(file = "../../contracts/stellar_ibc_gmp.wasm");
-}
-
-mod mock_light_client {
-    soroban_sdk::contractimport!(file = "../../contracts/stellar_mock_light_client.wasm");
+    soroban_sdk::contractimport!(file = "../../../contracts/stellar_ibc_gmp.wasm");
 }
 
 use gmp::{
@@ -29,7 +25,7 @@ struct Fixture {
     env: Env,
     router: IbcRouterClient<'static>,
     gmp: IbcGmpAppClient<'static>,
-    caller: IpsaGmpCallerClient<'static>,
+    caller: IpsaDispatcherClient<'static>,
     client_id: String,
     counterparty_id: String,
 }
@@ -42,11 +38,11 @@ fn setup() -> Fixture {
     let owner = Address::generate(&env);
     let router_id = env.register(router::WASM, (owner.clone(),));
     let router = IbcRouterClient::new(&env, &router_id);
-    let light_client = env.register(mock_light_client::WASM, ());
-    router.register_client_type(&String::from_str(&env, "mock"), &light_client);
+    let light_client = env.register(ipsa_test_light_client::TestLightClient, ());
+    router.register_client_type(&String::from_str(&env, "test"), &light_client);
 
     let client_id = router.create_client(
-        &String::from_str(&env, "mock"),
+        &String::from_str(&env, "test"),
         &Bytes::from_slice(&env, b"cs"),
         &Bytes::from_slice(&env, b"cons"),
         &1,
@@ -61,12 +57,12 @@ fn setup() -> Fixture {
     let gmp_id = env.register(gmp::WASM, (owner.clone(), router_id.clone()));
     router.register_port(&String::from_str(&env, "gmpport"), &gmp_id);
 
-    let caller_id = env.register(IpsaGmpCaller, (owner, gmp_id.clone()));
+    let caller_id = env.register(IpsaDispatcher, (owner, gmp_id.clone()));
 
     Fixture {
         router,
         gmp: IbcGmpAppClient::new(&env, &gmp_id),
-        caller: IpsaGmpCallerClient::new(&env, &caller_id),
+        caller: IpsaDispatcherClient::new(&env, &caller_id),
         client_id,
         counterparty_id,
         env,
