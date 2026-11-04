@@ -66,6 +66,7 @@ The contract cannot ask the GMP app during the call: Soroban does not let a cont
 Small apps a developer could build on ipsa, around one story: governance on one chain acting on another, and an issuer controlling their asset on another chain. Each is tested against the real router and apps, imported as wasm from an `ipsa-contracts` release, the way a project outside ipsa would test.
 
 - `examples/governance/dispatcher`: governance on Stellar acting on other chains. It sends approved actions to contracts on other chains through GMP and records each outcome, from pending to executed, rejected or timed out. Its owner is the governance contract, so only an approved proposal dispatches; the ipsa CLI deploys it with the admin as owner to test the GMP corridors. The council that votes on proposals and the executor on the other chain are still to come.
+- `examples/governance/poll` and `examples/governance/ethereum-poll`: a poll on each chain that accepts votes from its own accounts and, through GMP, from accounts on the other chain. A remote voter votes as the account the GMP app derives for it, so it can vote only as itself, and local and remote votes share one tally.
 - `examples/remote-treasury`: the same story the other way round, a treasury on Stellar governed by a DAO on another chain. Only the DAO's account, derived with `ipsa::gmp::remote_account`, can change it.
 - `examples/payouts`: how a treasury pays people on other chains through ICS-20, recording each payout as paid, refunded or timed out.
 - `examples/issuer`: how a Stellar asset issuer takes their asset to Ethereum without a bridge. The asset is escrowed on Stellar and arrives as the issuer's own ERC-20, which the issuer freezes and pauses from Stellar through GMP.
@@ -85,7 +86,7 @@ just ci
 just package
 ```
 
-`just ci` runs formatting, fetches the contracts the examples import, then clippy, the tests, the issuer token's Foundry tests and `cargo audit`, as CI does. It needs Foundry for the token. `just package` builds what crates.io would receive without publishing it.
+`just ci` runs formatting, fetches the contracts the examples import, then clippy, the tests, the Foundry tests of the issuer token and the Ethereum poll, and `cargo audit`, as CI does. It needs Foundry for those. `just package` builds what crates.io would receive without publishing it.
 
 ## Releasing
 
