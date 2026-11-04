@@ -39,6 +39,7 @@ all-features = true
 members = [
     ".",
     "examples/governance/dispatcher",
+    "examples/governance/poll",
     "examples/issuer/console",
     "examples/payouts",
     "examples/remote-treasury",

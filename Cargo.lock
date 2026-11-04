@@ -1030,6 +1030,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "ipsa-poll"
+version = "0.1.0"
+dependencies = [
+ "ipsa",
+ "ipsa-test-light-client",
+ "soroban-sdk",
+ "stellar-access",
+ "stellar-macros",
+]
+
+[[package]]
 name = "ipsa-remote-treasury"
 version = "0.1.0"
 dependencies = [

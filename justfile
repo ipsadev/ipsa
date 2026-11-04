@@ -28,13 +28,15 @@ contracts:
 # the examples' contract wasm, for deploying
 build-examples:
     stellar contract build --profile contract --package ipsa-dispatcher
+    stellar contract build --profile contract --package ipsa-poll
     stellar contract build --profile contract --package ipsa-remote-treasury
     stellar contract build --profile contract --package ipsa-payouts
     stellar contract build --profile contract --package ipsa-issuer-console
 
-# the issuer example's Ethereum token: dependencies, formatting, build and tests
+# the examples' Ethereum contracts: dependencies, formatting, build and tests
 solidity:
     cd examples/issuer/token && forge soldeer install && forge fmt --check && forge build && forge test
+    cd examples/governance/ethereum-poll && forge soldeer install && forge fmt --check && forge build && forge test
 
 fmt:
     cargo +nightly fmt --all
