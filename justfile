@@ -6,10 +6,10 @@ default:
     @just --list
 
 contracts_repository := "ipsadev/ipsa-contracts"
-contracts_version := env_var_or_default("CONTRACTS_VERSION", "v0.1.2")
+contracts_version := env_var_or_default("CONTRACTS_VERSION", "v0.2.0")
 
 # everything CI runs, in CI's order
-ci: fmt-check contracts lint test audit
+ci: fmt-check contracts lint test solidity audit
 
 # the ipsa contract wasm the examples' tests import: a release, or a local build from CONTRACTS_WASM_DIR
 contracts:
@@ -30,6 +30,11 @@ build-examples:
     stellar contract build --profile contract --package ipsa-dispatcher
     stellar contract build --profile contract --package ipsa-remote-treasury
     stellar contract build --profile contract --package ipsa-payouts
+    stellar contract build --profile contract --package ipsa-issuer-console
+
+# the issuer example's Ethereum token: dependencies, formatting, build and tests
+solidity:
+    cd examples/issuer/token && forge soldeer install && forge fmt --check && forge build && forge test
 
 fmt:
     cargo +nightly fmt --all

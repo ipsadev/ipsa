@@ -1010,6 +1010,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "ipsa-issuer-console"
+version = "0.1.0"
+dependencies = [
+ "ipsa",
+ "ipsa-test-light-client",
+ "soroban-sdk",
+ "stellar-access",
+ "stellar-macros",
+]
+
+[[package]]
 name = "ipsa-payouts"
 version = "0.1.0"
 dependencies = [
