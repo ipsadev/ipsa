@@ -35,6 +35,11 @@ jobs:
       - name: cache cargo
         uses: Swatinem/rust-cache@v2
 
+      - name: setup foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.1
+
       - name: setup just
         uses: extractions/setup-just@v3
 
