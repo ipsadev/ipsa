@@ -5,10 +5,11 @@ edition = "2021"
 rust-version = "1.91.0"
 license = "Apache-2.0"
 description = "Building blocks for IBC v2 on Stellar: commitment proofs, the Soroban router interface, GMP and ICS-20"
-repository = "https://github.com/ipsadev/ipsa-dev-kit"
+authors = ["Amanda Gonsalves"]
+repository = "https://github.com/ipsadev/ipsa"
 documentation = "https://docs.rs/ipsa"
 readme = "README.md"
-exclude = ["examples/", "testing/", ".github/"]
+exclude = ["examples/", "testing/", "contracts/", ".github/"]
 keywords = ["ibc", "stellar", "soroban", "ics23", "interoperability"]
 categories = ["cryptography::cryptocurrencies", "no-std"]
 

@@ -11,19 +11,33 @@ contracts_version := env_var_or_default("CONTRACTS_VERSION", "v0.2.0")
 # everything CI runs, in CI's order
 ci: fmt-check contracts lint test solidity audit
 
-# the ipsa contract wasm the examples' tests import: a release, or a local build from CONTRACTS_WASM_DIR
+contracts_files := "stellar_ibc_router.wasm stellar_ibc_transfer.wasm stellar_ibc_gmp.wasm ipsa_gmp_account.wasm"
+
+# the ipsa contract wasm the examples' tests import: the committed copies, checked against SHA256SUMS, or a local build from CONTRACTS_WASM_DIR
 contracts:
     #!/usr/bin/env bash
     set -euo pipefail
-    mkdir -p contracts
     if [ -n "${CONTRACTS_WASM_DIR:-}" ]; then
-        cp "$CONTRACTS_WASM_DIR"/*.wasm contracts/
+        for file in {{contracts_files}}; do cp "$CONTRACTS_WASM_DIR/$file" contracts/; done
         echo "copied the local build in $CONTRACTS_WASM_DIR"
         exit 0
     fi
-    gh release download "{{contracts_version}}" --repo "{{contracts_repository}}" \
-        --pattern '*.wasm' --pattern SHA256SUMS --dir contracts --clobber
     cd contracts && shasum -a 256 -c SHA256SUMS
+
+# replace the committed contract wasm with an ipsa-contracts release's, checked against its SHA256SUMS
+update-contracts version=contracts_version:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    scratch="$(mktemp -d)"
+    trap 'rm -rf "$scratch"' EXIT
+    gh release download "{{version}}" --repo "{{contracts_repository}}" --pattern '*.wasm' --pattern SHA256SUMS --dir "$scratch"
+    (cd "$scratch" && shasum -a 256 -c SHA256SUMS --ignore-missing)
+    : > contracts/SHA256SUMS
+    for file in {{contracts_files}}; do
+        cp "$scratch/$file" contracts/
+        grep " $file$" "$scratch/SHA256SUMS" >> contracts/SHA256SUMS
+    done
+    echo "contracts/ now holds {{version}}"
 
 # the examples' contract wasm, for deploying
 build-examples:
@@ -51,7 +65,7 @@ test:
     cargo test --locked --workspace
 
 audit:
-    cargo audit --file Cargo.lock
+    cargo audit --file Cargo.lock --ignore RUSTSEC-2026-0387
 
 # what crates.io would receive, without sending it
 package:

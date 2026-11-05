@@ -55,6 +55,4 @@ jobs:
         run: cargo install cargo-audit --locked
 
       - name: just ci
-        env:
-          GH_TOKEN: ${{ secrets.IPSA_CONTRACTS_TOKEN || github.token }}
         run: just ci

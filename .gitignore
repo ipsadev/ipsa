@@ -3,4 +3,9 @@ target
 /.vscode/
 .DS_Store
 test_snapshots/
-/contracts/
+/contracts/*
+!/contracts/SHA256SUMS
+!/contracts/stellar_ibc_router.wasm
+!/contracts/stellar_ibc_transfer.wasm
+!/contracts/stellar_ibc_gmp.wasm
+!/contracts/ipsa_gmp_account.wasm

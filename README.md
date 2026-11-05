@@ -1,4 +1,4 @@
-# ipsa-dev-kit
+# ipsa
 
 What a developer needs to build on ipsa, the IBC v2 implementation for Stellar.
 
@@ -86,7 +86,11 @@ just ci
 just package
 ```
 
-`just ci` runs formatting, fetches the contracts the examples import, then clippy, the tests, the Foundry tests of the issuer token and the Ethereum poll, and `cargo audit`, as CI does. It needs Foundry for those. `just package` builds what crates.io would receive without publishing it.
+`just ci` runs formatting, checks the contract wasm the examples import against `contracts/SHA256SUMS`, then clippy, the tests, the Foundry tests of the issuer token and the Ethereum poll, and `cargo audit`, as CI does. It needs Foundry for those. `just package` builds what crates.io would receive without publishing it.
+
+`contracts/` holds the four `ipsa-contracts` wasm files the examples' tests import (the router, the transfer app, the GMP app and the GMP account) from release `v0.2.0`, with the release's checksums for them, so the tests run from a fresh clone. `just update-contracts <tag>` replaces them with another release's, checked against its `SHA256SUMS`, and `CONTRACTS_WASM_DIR` points `just contracts` at a local build instead. The files are not part of the published crate.
+
+`cargo audit` ignores RUSTSEC-2026-0387, timing variability in `crypto-bigint` 0.5. It reaches the workspace only through `soroban-sdk` 26 (`soroban-env-host`, `k256`, `elliptic-curve`), and the fix is in `crypto-bigint` 0.7, which the Soroban SDK has not adopted yet. Drop the exception when it does.
 
 ## Releasing
 
@@ -94,4 +98,6 @@ Push a tag `vX.Y.Z` matching the crate version. `.github/workflows/release.yml` 
 
 ## Licence
 
-Apache-2.0. See `LICENSE` and `NOTICE`.
+Copyright 2026 Amanda Gonsalves.
+
+Licensed under the Apache License, Version 2.0. See `LICENSE` and `NOTICE`. The contract wasm in `contracts/` is built from `ipsa-contracts`, which is under the same licence.
