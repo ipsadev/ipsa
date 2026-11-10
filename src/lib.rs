@@ -5,8 +5,9 @@
 //! - [`app`]: a client for the router, and the interface an ibc application implements.
 //! - [`gmp`]: the ics-27 gmp types, client, callbacks and remote account derivation.
 //! - [`ics20`]: the ics-20 types, client and callbacks.
+//! - [`gateway`]: grpc clients and servers for the proof api and the stellar gateway.
 
-#![no_std]
+#![cfg_attr(not(feature = "gateway"), no_std)]
 
 #[cfg(feature = "core")]
 extern crate alloc;
@@ -15,6 +16,8 @@ extern crate alloc;
 pub mod app;
 #[cfg(feature = "core")]
 pub mod core;
+#[cfg(feature = "gateway")]
+pub mod gateway;
 #[cfg(feature = "gmp")]
 pub mod gmp;
 #[cfg(feature = "ics20")]

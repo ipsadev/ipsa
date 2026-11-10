@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package proofapi;
+
+option go_package = "types/proofapi";
+
+service ProofApiService {
+    rpc RelayByTx (RelayByTxRequest) returns (RelayByTxResponse);
+    rpc CreateClient (CreateClientRequest) returns (CreateClientResponse);
+    rpc UpdateClient (UpdateClientRequest) returns (UpdateClientResponse);
+    rpc Info (InfoRequest) returns (InfoResponse);
+}
+
+message RelayByTxRequest {
+    string src_chain = 1;
+    string dst_chain = 2;
+    repeated bytes source_tx_ids = 3;
+    repeated bytes timeout_tx_ids = 4;
+    string src_client_id = 5;
+    string dst_client_id = 6;
+    repeated uint64 src_packet_sequences = 7;
+    repeated uint64 dst_packet_sequences = 8;
+}
+
+message RelayByTxResponse {
+    bytes tx = 1;
+    string address = 2;
+}
+
+message CreateClientRequest {
+    string src_chain = 1;
+    string dst_chain = 2;
+    map<string, string> parameters = 3;
+}
+
+message CreateClientResponse {
+    bytes tx = 1;
+    string address = 2;
+}
+
+message UpdateClientRequest {
+    string src_chain = 1;
+    string dst_chain = 2;
+    string dst_client_id = 3;
+}
+
+message UpdateClientResponse {
+    bytes tx = 1;
+    string address = 2;
+}
+
+message InfoRequest {
+    string src_chain = 1;
+    string dst_chain = 2;
+}
+
+message InfoResponse {
+    Chain target_chain = 1;
+    Chain source_chain = 2;
+    map<string, string> metadata = 3;
+}
+
+message Chain {
+    string chain_id = 1;
+    string ibc_version = 2;
+    string ibc_contract = 3;
+}

@@ -10,6 +10,7 @@ repository = "https://github.com/ipsadev/ipsa"
 documentation = "https://docs.rs/ipsa"
 readme = "README.md"
 exclude = ["examples/", "testing/", "contracts/", ".github/"]
+build = "build.rs"
 keywords = ["ibc", "stellar", "soroban", "ics23", "interoperability"]
 categories = ["cryptography::cryptocurrencies", "no-std"]
 
@@ -20,15 +21,38 @@ types = ["dep:soroban-sdk"]
 app = ["types"]
 gmp = ["dep:soroban-sdk"]
 ics20 = ["dep:soroban-sdk"]
+gateway = [
+    "dep:prost-gateway",
+    "dep:tonic",
+    "dep:tonic-prost",
+    "dep:prost-build",
+    "dep:protox",
+    "dep:tonic-prost-build",
+]
 
 [dependencies]
 ics23 = { version = "0.12", default-features = false, optional = true }
 prost = { version = "0.13", default-features = false, features = ["derive"], optional = true }
 sha2 = { version = "0.10", default-features = false, optional = true }
 soroban-sdk = { version = "26.1.0", optional = true }
+prost-gateway = { package = "prost", version = "0.14", optional = true }
+tonic = { version = "0.14.6", optional = true }
+tonic-prost = { version = "0.14.6", optional = true }
+
+[build-dependencies]
+prost-build = { version = "0.14", optional = true }
+prost-gateway = { package = "prost", version = "0.14", optional = true }
+protox = { version = "0.10", optional = true }
+tonic-prost-build = { version = "0.14.6", optional = true }
 
 [dev-dependencies]
 soroban-sdk = { version = "26.1.0", features = ["testutils"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "net"] }
+tokio-stream = { version = "0.1", features = ["net"] }
+
+[[test]]
+name = "gateway"
+required-features = ["gateway"]
 
 [lints.rust]
 unsafe_code = "deny"

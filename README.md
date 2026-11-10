@@ -13,8 +13,9 @@ One crate, one module per area, each behind a feature of the same name. All are 
 | `ipsa::app` | `app` | a client for the Soroban router, and the `IbcApplication` interface a custom application implements |
 | `ipsa::gmp` | `gmp` | the ICS-27 GMP types, a client for the GMP app, the `GmpCaller` callbacks and `remote_account` |
 | `ipsa::ics20` | `ics20` | the ICS-20 types, a client for the transfer app, and the `TransferSender` and `TransferReceiver` callbacks |
+| `ipsa::gateway` | `gateway` | gRPC clients and servers for the proof API (`ipsa::gateway::proofapi`) and the Stellar gateway (`ipsa::gateway::stellar`), generated from `proto/` |
 
-The crate is `no_std`. The Soroban modules depend only on `soroban-sdk`, and `core` only on `sha2`, `ics23` and `prost`. A Soroban contract turns `core` off so its wasm carries none of it:
+The crate is `no_std` unless `gateway` is on, and `gateway` is off by default. The Soroban modules depend only on `soroban-sdk`, and `core` only on `sha2`, `ics23` and `prost`. A Soroban contract turns `core` off so its wasm carries none of it:
 
 ```toml
 ipsa = { version = "0.1", default-features = false, features = ["gmp"] }
@@ -29,6 +30,34 @@ ipsa = { version = "0.1", default-features = false, features = ["core"] }
 `ipsa::core` was published on its own as `ipsa-ibc-core` up to 0.1.2, from the `ipsa-core` repository. It lives here now.
 
 The ipsa contracts in `ipsa-contracts` are built on this crate, so the types here are the ones on chain. A contract that calls the router, the transfer app or the GMP app, or is called back by them, should use them rather than copy them: a copy that misses a field stops decoding the callback, and Soroban reports nothing.
+
+## Talking to the proof API and the gateway
+
+`proto/` is the one copy of the proof API and Stellar gateway protocols. `ipsa-gateway` serves them, and the relayer, the `ipsa` CLI and anyone relaying for themselves call them. `gateway` generates the clients and servers at build time with `protox`, so no `protoc` is needed:
+
+```toml
+ipsa = { version = "0.1", default-features = false, features = ["gateway"] }
+```
+
+```rust
+use ipsa::gateway::proofapi::{proof_api_service_client::ProofApiServiceClient, RelayByTxRequest};
+
+let mut proof_api = ProofApiServiceClient::connect("http://localhost:3100").await?;
+
+let relay = proof_api
+    .relay_by_tx(RelayByTxRequest {
+        src_chain: "stellar-testnet".into(),
+        dst_chain: "provider".into(),
+        source_tx_ids: vec![hex::decode(transaction_hash)?],
+        ..Default::default()
+    })
+    .await?
+    .into_inner();
+```
+
+`RelayByTx` takes the source transactions to relay, and the destination transactions to time out, between two chains. It returns what the caller signs and submits, and the contract it goes to. For Stellar, `tx` is a length-prefixed XDR array of `HostFunction`, submitted one transaction at a time and in order. For the Cosmos Hub it is the Cosmos messages, and for an EVM chain the router calldata. `UpdateClient` and `CreateClient` return the transaction that updates or creates a client on the destination chain, and `Info` the chain ids, IBC version and router of the pair.
+
+The generated messages use prost 0.14 while `core` stays on prost 0.13 for `ics23`, so encode and decode them with a prost 0.14 `Message`.
 
 ## Calling another chain from a Soroban contract
 
