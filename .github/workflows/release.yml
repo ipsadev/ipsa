@@ -137,7 +137,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           {
-            printf 'Building blocks for IBC v2 on Stellar, %s: `core`, `types`, `app`, `gmp` and `ics20`, each behind a feature of the same name.\n\n' "$TAG"
+            printf 'Building blocks for IBC v2 on Stellar, %s: `core`, `types`, `app`, `gmp` and `ics20`, each behind a feature of the same name and on by default, and `gateway`, the proof API and Stellar gateway gRPC clients and servers, off by default.\n\n' "$TAG"
             printf '```toml\n'
             printf '%s = "%s"\n' "$CRATE" "$VERSION"
             printf '```\n\n'

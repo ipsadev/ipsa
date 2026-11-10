@@ -18,13 +18,13 @@ One crate, one module per area, each behind a feature of the same name. All are 
 The crate is `no_std` unless `gateway` is on, and `gateway` is off by default. The Soroban modules depend only on `soroban-sdk`, and `core` only on `sha2`, `ics23` and `prost`. A Soroban contract turns `core` off so its wasm carries none of it:
 
 ```toml
-ipsa = { version = "0.1", default-features = false, features = ["gmp"] }
+ipsa = { version = "0.2", default-features = false, features = ["gmp"] }
 ```
 
 A service that only builds or checks proofs does the opposite:
 
 ```toml
-ipsa = { version = "0.1", default-features = false, features = ["core"] }
+ipsa = { version = "0.2", default-features = false, features = ["core"] }
 ```
 
 `ipsa::core` was published on its own as `ipsa-ibc-core` up to 0.1.2, from the `ipsa-core` repository. It lives here now.
@@ -36,7 +36,7 @@ The ipsa contracts in `ipsa-contracts` are built on this crate, so the types her
 `proto/` is the one copy of the proof API and Stellar gateway protocols. `ipsa-gateway` serves them, and the relayer, the `ipsa` CLI and anyone relaying for themselves call them. `gateway` generates the clients and servers at build time with `protox`, so no `protoc` is needed:
 
 ```toml
-ipsa = { version = "0.1", default-features = false, features = ["gateway"] }
+ipsa = { version = "0.2", default-features = false, features = ["gateway"] }
 ```
 
 ```rust
