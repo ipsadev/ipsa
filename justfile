@@ -60,9 +60,11 @@ fmt-check:
 
 lint:
     cargo clippy --locked --workspace --all-targets -- {{lints}}
+    cargo clippy --locked --package ipsa --all-targets --features gateway -- {{lints}}
 
 test:
     cargo test --locked --workspace
+    cargo test --locked --package ipsa --features gateway --test gateway
 
 audit:
     cargo audit --file Cargo.lock --ignore RUSTSEC-2026-0387
