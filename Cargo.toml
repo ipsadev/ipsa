@@ -9,7 +9,7 @@ authors = ["Amanda Gonsalves"]
 repository = "https://github.com/ipsadev/ipsa"
 documentation = "https://docs.rs/ipsa"
 readme = "README.md"
-exclude = ["examples/", "testing/", "contracts/", ".github/"]
+exclude = ["chains/", "examples/", "testing/", "contracts/", ".github/"]
 build = "build.rs"
 keywords = ["ibc", "stellar", "soroban", "ics23", "interoperability"]
 categories = ["cryptography::cryptocurrencies", "no-std"]
@@ -63,6 +63,7 @@ all-features = true
 [workspace]
 members = [
     ".",
+    "chains",
     "examples/governance/dispatcher",
     "examples/governance/poll",
     "examples/issuer/console",

@@ -1,0 +1,29 @@
+[package]
+name = "ipsa-chains"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.91.0"
+license = "Apache-2.0"
+description = "Stellar and Cosmos encoding for IBC v2 services: Soroban values, IBC v2 messages, Tendermint client and consensus states, router packet events"
+authors = ["Amanda Gonsalves"]
+repository = "https://github.com/ipsadev/ipsa"
+documentation = "https://docs.rs/ipsa-chains"
+readme = "README.md"
+keywords = ["ibc", "stellar", "soroban", "tendermint", "interoperability"]
+categories = ["cryptography::cryptocurrencies", "encoding"]
+
+[dependencies]
+anyhow = "1"
+hex = "0.4"
+ibc = { version = "0.57.0", features = ["serde"] }
+ibc-proto = { version = "0.51", default-features = false, features = ["std"] }
+ics23 = "0.12"
+prost = "0.13"
+serde_json = "1.0.150"
+soroban-client = "0.7.0"
+stellar-strkey = "0.0.16"
+tendermint = { version = "0.40.3", features = ["secp256k1"] }
+tracing = "0.1"
+
+[lints.rust]
+unsafe_code = "forbid"
