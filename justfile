@@ -1,4 +1,4 @@
-# Crates for building on ipsa: IBC v2 types, the router client, GMP and ICS-20
+# Crates for building on ipsa: IBC v2 types, the router client, GMP and ICS-20, and the Stellar and Cosmos encoding of ipsa-chains
 
 lints := "-D warnings -A clippy::manual_is_multiple_of -A clippy::too_many_arguments -A clippy::result_large_err"
 
@@ -67,11 +67,11 @@ test:
     cargo test --locked --package ipsa --features gateway --test gateway
 
 audit:
-    cargo audit --file Cargo.lock --ignore RUSTSEC-2026-0387
+    cargo audit --file Cargo.lock --ignore RUSTSEC-2026-0387 --ignore RUSTSEC-2026-0009 --ignore RUSTSEC-2026-0258
 
-# what crates.io would receive, without sending it
-package:
-    cargo package --locked --package ipsa
+# what crates.io would receive, without sending it: ipsa or ipsa-chains
+package crate="ipsa":
+    cargo package --locked --package {{crate}}
 
 clean:
     cargo clean

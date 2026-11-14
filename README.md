@@ -115,15 +115,17 @@ just ci
 just package
 ```
 
-`just ci` runs formatting, checks the contract wasm the examples import against `contracts/SHA256SUMS`, then clippy, the tests, the Foundry tests of the issuer token and the Ethereum poll, and `cargo audit`, as CI does. It needs Foundry for those. `just package` builds what crates.io would receive without publishing it.
+`just ci` runs formatting, checks the contract wasm the examples import against `contracts/SHA256SUMS`, then clippy, the tests, the Foundry tests of the issuer token and the Ethereum poll, and `cargo audit`, as CI does. It needs Foundry for those. `just package` builds what crates.io would receive without publishing it, and `just package ipsa-chains` does the same for `ipsa-chains`.
 
 `contracts/` holds the four `ipsa-contracts` wasm files the examples' tests import (the router, the transfer app, the GMP app and the GMP account) from release `v0.2.0`, with the release's checksums for them, so the tests run from a fresh clone. `just update-contracts <tag>` replaces them with another release's, checked against its `SHA256SUMS`, and `CONTRACTS_WASM_DIR` points `just contracts` at a local build instead. The files are not part of the published crate.
 
 `cargo audit` ignores RUSTSEC-2026-0387, timing variability in `crypto-bigint` 0.5. It reaches the workspace only through `soroban-sdk` 26 (`soroban-env-host`, `k256`, `elliptic-curve`), and the fix is in `crypto-bigint` 0.7, which the Soroban SDK has not adopted yet. Drop the exception when it does.
 
+It also ignores two advisories that reach only `ipsa-chains`: RUSTSEC-2026-0009, a stack exhaustion in `time` 0.3.37, which `ibc` 0.57 pins below the fixed 0.3.47, so `ipsa-chains` cannot move until `ibc` does, and RUSTSEC-2026-0258, unbounded empty DATA frames in `h2` 0.3, which comes with `soroban-client` 0.7's HTTP client and only talks to the Soroban RPC its caller configures. Drop each once `ibc` or `soroban-client` upgrades.
+
 ## Releasing
 
-Push a tag `vX.Y.Z` matching the crate version. `.github/workflows/release.yml` runs `just ci` and `just package`, publishes `ipsa` to crates.io with the `CARGO_REGISTRY_TOKEN` secret, and writes the GitHub release. Running it by hand with `dry_run` rehearses every step without publishing. A version already on crates.io is only re-announced, and only if it was published from the same commit.
+Each crate has its own tags: `vX.Y.Z` releases `ipsa` and `ipsa-chains-vX.Y.Z` releases `ipsa-chains`, each matching its crate's version. `.github/workflows/release.yml` runs `just ci` and `just package` for that crate, publishes it to crates.io with the `CARGO_REGISTRY_TOKEN` secret, and writes the GitHub release. Running it by hand with `dry_run`, and the crate to rehearse, runs every step without publishing. A version already on crates.io is only re-announced, and only if it was published from the same commit.
 
 ## Licence
 

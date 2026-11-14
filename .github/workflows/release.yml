@@ -2,14 +2,20 @@ name: release
 
 on:
   push:
-    tags: ["v*"]
+    tags: ["v*", "ipsa-chains-v*"]
   workflow_dispatch:
     inputs:
       tag:
-        description: "tag to release (e.g. v0.1.0); leave empty with dry_run to rehearse the branch this runs from"
+        description: "tag to release (v0.1.0 for ipsa, ipsa-chains-v0.1.0 for ipsa-chains); leave empty with dry_run to rehearse the branch this runs from"
         required: false
         default: ""
         type: string
+      crate:
+        description: "crate to rehearse when no tag is given"
+        required: false
+        default: ipsa
+        type: choice
+        options: [ipsa, ipsa-chains]
       dry_run:
         description: "run every gate but do not publish"
         required: false
@@ -50,19 +56,25 @@ jobs:
       - name: the tag must match the crate version
         env:
           DRY_RUN: ${{ github.event.inputs.dry_run }}
+          INPUT_CRATE: ${{ github.event.inputs.crate }}
         run: |
-          version="$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[] | select(.name == "ipsa") | .version')"
-          crate=ipsa
+          case "$TAG" in
+            ipsa-chains-v*) crate=ipsa-chains; prefix=ipsa-chains-v ;;
+            v*) crate=ipsa; prefix=v ;;
+            "") crate="${INPUT_CRATE:-ipsa}"; [ "$crate" = ipsa ] && prefix=v || prefix="$crate-v" ;;
+            *) echo "::error::tag $TAG is neither vX.Y.Z nor ipsa-chains-vX.Y.Z"; exit 1 ;;
+          esac
+          version="$(cargo metadata --no-deps --format-version 1 | jq -r --arg crate "$crate" '.packages[] | select(.name == $crate) | .version')"
           echo "CRATE=$crate" >> "$GITHUB_ENV"
           if [ -z "$TAG" ]; then
             if [ "$DRY_RUN" != "true" ]; then
               echo "::error::a release needs a tag; to rehearse without one, run with dry_run"
               exit 1
             fi
-            echo "TAG=v$version" >> "$GITHUB_ENV"
-            echo "::notice::rehearsing v$version from $GITHUB_REF_NAME, no tag needed"
-          elif [ "$TAG" != "v$version" ]; then
-            echo "::error::tag $TAG does not match Cargo.toml version $version"
+            echo "TAG=$prefix$version" >> "$GITHUB_ENV"
+            echo "::notice::rehearsing $crate $prefix$version from $GITHUB_REF_NAME, no tag needed"
+          elif [ "$TAG" != "$prefix$version" ]; then
+            echo "::error::tag $TAG does not match $crate's Cargo.toml version $version"
             exit 1
           else
             echo "tag $TAG matches crate version $version"
@@ -124,13 +136,13 @@ jobs:
         run: just ci
 
       - name: package, and compile what crates.io would receive
-        run: just package
+        run: just package "$CRATE"
 
       - name: publish, for real this time
         if: ${{ github.event.inputs.dry_run != 'true' && env.PUBLISHED != 'true' }}
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-        run: cargo publish --locked --package ipsa
+        run: cargo publish --locked --package "$CRATE"
 
       - name: say what a dry run skipped
         if: ${{ github.event.inputs.dry_run == 'true' }}
@@ -142,7 +154,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           {
-            printf 'Building blocks for IBC v2 on Stellar, %s: `core`, `types`, `app`, `gmp` and `ics20`, each behind a feature of the same name and on by default, and `gateway`, the proof API and Stellar gateway gRPC clients and servers, off by default.\n\n' "$TAG"
+            if [ "$CRATE" = ipsa-chains ]; then
+              printf 'The Stellar and Cosmos encoding for IBC v2 services, %s: Soroban values, IBC v2 messages, Tendermint client and consensus states and the router'"'"'s packet events.\n\n' "$TAG"
+            else
+              printf 'Building blocks for IBC v2 on Stellar, %s: `core`, `types`, `app`, `gmp` and `ics20`, each behind a feature of the same name and on by default, and `gateway`, the proof API and Stellar gateway gRPC clients and servers, off by default.\n\n' "$TAG"
+            fi
             printf '```toml\n'
             printf '%s = "%s"\n' "$CRATE" "$VERSION"
             printf '```\n\n'
