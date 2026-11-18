@@ -5,7 +5,7 @@ use ipsa::gateway::{
         CreateClientRequest, CreateClientResponse, InfoRequest, InfoResponse, RelayByTxRequest,
         RelayByTxResponse, UpdateClientRequest, UpdateClientResponse,
     },
-    stellar::{QueryTreeSiblingsRequest, QueryTreeSiblingsResponse},
+    stellar::{QueryTreeSiblingsRequest, QueryTreeSiblingsResponse, QuorumConfig},
 };
 use prost_gateway::Message;
 use tokio::net::TcpListener;
@@ -115,4 +115,31 @@ fn the_descriptor_set_names_every_service() {
     assert!(descriptors.contains("ProofApiService"));
     assert!(descriptors.contains("StellarGatewayQuery"));
     assert!(descriptors.contains("StellarGatewayMsg"));
+}
+
+#[test]
+fn a_quorum_config_carries_its_fingerprint_as_field_3() {
+    let config = QuorumConfig {
+        quorum_set_xdr: vec![0xaa; 2],
+        valid_from: 7,
+        quorum_set_fingerprint: vec![0xbb; 32],
+    };
+
+    let mut expected = vec![0x0a, 0x02, 0xaa, 0xaa, 0x10, 0x07, 0x1a, 0x20];
+
+    expected.extend_from_slice(&[0xbb; 32]);
+
+    assert_eq!(config.encode_to_vec(), expected);
+    assert_eq!(QuorumConfig::decode(expected.as_slice()).unwrap(), config);
+}
+
+#[test]
+fn a_quorum_config_without_a_fingerprint_still_decodes() {
+    let older = [0x0a, 0x02, 0xaa, 0xaa, 0x10, 0x07];
+
+    let config = QuorumConfig::decode(older.as_slice()).unwrap();
+
+    assert_eq!(config.quorum_set_xdr, vec![0xaa; 2]);
+    assert_eq!(config.valid_from, 7);
+    assert!(config.quorum_set_fingerprint.is_empty());
 }
