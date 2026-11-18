@@ -158,8 +158,9 @@ message Height {
 }
 
 message QuorumConfig {
-  bytes  quorum_set_xdr = 1;
-  uint64 valid_from     = 2;
+  bytes  quorum_set_xdr         = 1;
+  uint64 valid_from             = 2;
+  bytes  quorum_set_fingerprint = 3;
 }
 
 message StellarClientState {
